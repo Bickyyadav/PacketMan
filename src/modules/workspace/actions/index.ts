@@ -1,3 +1,5 @@
+"use server";
+
 import db from "@/lib/db";
 import { currentUser } from "@/modules/authentication/actions"
 import { MEMBER_ROLE } from "@prisma/client";
@@ -53,21 +55,77 @@ export const initializeWorkspace = async () => {
 }
 
 
+// export const getWorkspaces = async () => {
+//     const user = await currentUser();
+//     if (!user) throw new Error("Unauthorized");
+//     const workspace = await db.workspace.findMany({
+//         where: {
+//             OR: [
+//                 { ownerId: user.id },
+//                 {
+//                     members: { some: { userId: user.id } }
+//                 }
+//             ]
+//         },
+//         orderBy: { createdAt: "asc" }
+//     })
+//     console.log("🚀 ~ getWorkspaces ~ workspace:", workspace)
+//     return workspace
+// }
+
+
 export const getWorkspaces = async () => {
-    const user = await currentUser();
-    if (!user) throw new Error("Unauthorized");
-    const workspace = await db.workspace.findMany({
-        where: {
-            OR: [
-                { ownerId: user.id },
-                {
-                    members: { some: { userId: user.id } }
+    try {
+        const user = await currentUser();
+        console.log("🚀 ~ getWorkspaces ~ user:", user);
+
+        if (!user) {
+            throw new Error("Unauthorized");
+        }
+
+        const workspaces = await db.workspace.findMany({
+            where: {
+                OR: [
+                    { ownerId: user.id },
+                    {
+                        members: {
+                            some: {
+                                userId: user.id
+                            }
+                        }
+                    }
+                ]
+            },
+            include: {
+                members: {
+                    include: {
+                        User: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true,
+                                image: true
+                            }
+                        }
+                    }
+                },
+                owner: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        image: true
+                    }
                 }
-            ]
-        },
-        orderBy: { createdAt: "asc" }
-    })
-    return workspace
+            },
+            orderBy: { createdAt: "asc" }
+        });
+
+        return workspaces;
+    } catch (error) {
+        console.error("🚀 ~ getWorkspaces ~ error:", error);
+        throw error;
+    }
 }
 
 export const createWorkspace = async (name: string) => {

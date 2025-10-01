@@ -1,5 +1,5 @@
 import { Unplug } from "lucide-react"
-import { UserProps, WorkspaceProps } from "../types"
+import { UserProps } from "../types"
 import UserButton from "@/modules/authentication/components/user-button"
 import SearchBar from "./search-bar"
 import InviteMember from "./invite-member"
@@ -11,7 +11,7 @@ interface Props {
     // workspace: WorkspaceProps
 }
 
-export const Header = ({ user }: Props) => {
+export const Header = ({ user, }: Props) => {
     return (<header className="grid grid-cols-5 grid-rows-1 gap-2 overflow-x-auto overflow-hidden p-2 border">
         <div className="col-span-2 flex items-center justify-between space-x-2 hover:cursor-pointer hover:opacity-80 ml-4">
             <Unplug size={28} className='text-indigo-400' />
