@@ -22,8 +22,8 @@ interface UserData {
     email: string | null;
     name: string | null;
     image: string | null;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: Date | string;
+    updatedAt: Date | string;
 }
 
 interface UserButtonProps {
@@ -96,7 +96,7 @@ export default function UserButton({
     };
 
     // Format member since date
-    const formatMemberSince = (date: Date) => {
+    const formatMemberSince = (date: Date | string) => {
         return new Intl.DateTimeFormat("en-US", {
             month: "long",
             year: "numeric",
