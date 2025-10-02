@@ -71,15 +71,15 @@ model Verification {
 }
 
 model Workspace {
-  id          String  @id @default(uuid())
-  name        String  @unique
+  id          String            @id @default(uuid())
+  name        String            @unique
   description String?
   ownerId     String
-  owner       User    @relation("UserWorkspaces", fields: [ownerId], references: [id])
-
-  members   workspaceMember[]
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @default(now()) @updatedAt
+  owner       User              @relation("UserWorkspaces", fields: [ownerId], references: [id])
+  collection  Collection[]
+  members     workspaceMember[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @default(now()) @updatedAt
 
   @@unique([name, ownerId])
 }
@@ -97,8 +97,19 @@ model workspaceMember {
   workspaceId String?
   User        User?       @relation(fields: [userId], references: [id])
   userId      String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @default(now()) @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@unique([userId, workspaceId])
+}
+
+model Collection {
+  id   String @id @default(uuid())
+  name String
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @default(now()) @updatedAt
+  Workspace   Workspace? @relation(fields: [workspaceId], references: [id])
+  workspaceId String?
 }
