@@ -113,12 +113,12 @@ const CollectionFolder = ({ collection }: Props) => {
         setIsModalOpen={setIsDeleteOpen}
         collectionId={collection.id}
       />
-      {/* <AddRequestCollectionModal
+      <AddRequestCollectionModal
         isModalOpen={isAddRequestOpen}
         setIsModalOpen={setIsAddRequestOpen}
         collectionId={collection.id}
         initialName="Untitled Request"
-      /> */}
+      />
     </>
   )
 }

@@ -105,11 +105,37 @@ model workspaceMember {
 }
 
 model Collection {
-  id   String @id @default(uuid())
-  name String
+  id      String    @id @default(uuid())
+  name    String
+  request Request[]
 
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @default(now()) @updatedAt
-  Workspace   Workspace? @relation(fields: [workspaceId], references: [id])
+  Workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   workspaceId String?
+}
+
+enum REST_METHOD {
+  GET
+  POST
+  PUT
+  PATCH
+  DELETE
+}
+
+model Request {
+  id         String      @id @default(uuid())
+  name       String
+  method     REST_METHOD @default(GET)
+  url        String
+  parameters Json?
+  headers    Json?
+
+  body         Json?
+  response     Json?
+  Collection   Collection? @relation(fields: [collectionId], references: [id],onDelete: Cascade)
+  collectionId String?
+
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @default(now()) @updatedAt
 }
