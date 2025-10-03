@@ -6,9 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash2, Check, X } from "lucide-react";
-import { cn } from "@/lib/utils";
-
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
@@ -17,36 +14,37 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
+import { Plus, Trash2, Check, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const keyValueSchema = z.object({
   items: z.array(
     z.object({
-      key: z.string(),
-      value: z.string(),
-      enabled: z.boolean().default(true).optional()
+      key: z.string().min(1, "Key is required"),
+      value: z.string().min(1, "Value is required"),
+      enabled: z.boolean().default(true).optional(),
     })
-  )
-})
+  ),
+});
 
-type keyValueFormData = z.infer<typeof keyValueSchema>
+type KeyValueFormData = z.infer<typeof keyValueSchema>;
 
 export interface KeyValueItem {
-  key: string,
-  value: string,
-  enabled?: boolean
+  key: string;
+  value: string;
+  enabled?: boolean;
 }
 
-export interface KeyValueFormEditorProps {
-  initialData: KeyValueItem[];
+interface KeyValueFormEditorProps {
+  initialData?: KeyValueItem[];
   onSubmit: (data: KeyValueItem[]) => void;
-  placeholder: {
-    key: string,
-    value?: string,
-    description: string,
+  placeholder?: {
+    key?: string;
+    value?: string;
+    description?: string;
   };
-  className?: string
+  className?: string;
 }
-
 
 const KeyValueFormEditor: React.FC<KeyValueFormEditorProps> = ({
   initialData = [],
@@ -58,26 +56,36 @@ const KeyValueFormEditor: React.FC<KeyValueFormEditorProps> = ({
   },
   className,
 }) => {
-  const form = useForm<keyValueFormData>({
+  const form = useForm<KeyValueFormData>({
     resolver: zodResolver(keyValueSchema),
     defaultValues: {
       items:
-        initialData.length > 0 ?
-          initialData.map((item) => ({
-            ...item,
-            enabled: item.enabled ?? true,
-          })) : [{ key: "", value: "", enabled: true }]
-    }
-  })
+        initialData.length > 0
+          ? initialData.map((item) => ({
+              ...item,
+              enabled: item.enabled ?? true,
+            }))
+          : [{ key: "", value: "", enabled: true }],
+    },
+  });
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "items",
-  })
+  });
+
+  const handleSubmit = (data: KeyValueFormData) => {
+    const filteredItems = data.items
+      .filter((item) => item.enabled && (item.key.trim() || item.value.trim()))
+      .map(({ key, value }) => ({ key, value }));
+
+    onSubmit(filteredItems);
+  };
 
   const addNewRow = () => {
     append({ key: "", value: "", enabled: true });
   };
+
   const toggleEnabled = (index: number) => {
     const currentValue = form.getValues(`items.${index}.enabled`);
     form.setValue(`items.${index}.enabled`, !currentValue);
@@ -89,15 +97,16 @@ const KeyValueFormEditor: React.FC<KeyValueFormEditorProps> = ({
     }
   };
 
-  //auto saved
+  // Autosave on changes with debounce
+  // We'll serialize the filtered items and only call onSubmit when it changes.
   const lastSavedRef = useRef<string | null>(null);
+
   const getFilteredItemsFromValues = (items: KeyValueItem[]) =>
     items
       .filter(
         (item) => item.enabled && (item.key?.trim() || item.value?.trim())
       )
       .map(({ key, value }) => ({ key, value }));
-
 
   // Simple debounce implementation
   const debounce = (fn: (...args: any[]) => void, wait = 500) => {
@@ -108,14 +117,17 @@ const KeyValueFormEditor: React.FC<KeyValueFormEditorProps> = ({
     };
   };
 
-  const saveIfChanged = useCallback((Items: KeyValueItem[]) => {
-    const filtered = getFilteredItemsFromValues(Items);
-    const serialized = JSON.stringify(filtered);
-    if (serialized !== lastSavedRef.current) {
-      lastSavedRef.current = serialized;
-      onSubmit(filtered);
-    }
-  }, [onSubmit])
+  const saveIfChanged = useCallback(
+    (items: KeyValueItem[]) => {
+      const filtered = getFilteredItemsFromValues(items);
+      const serialized = JSON.stringify(filtered);
+      if (serialized !== lastSavedRef.current) {
+        lastSavedRef.current = serialized;
+        onSubmit(filtered);
+      }
+    },
+    [onSubmit]
+  );
 
   const debouncedSaveRef = useRef(saveIfChanged);
   // keep ref up to date when saveIfChanged changes
@@ -135,21 +147,21 @@ const KeyValueFormEditor: React.FC<KeyValueFormEditorProps> = ({
   // Watch form values and trigger debounced save
   useEffect(() => {
     const subscription = form.watch((value) => {
-      const items = (value as keyValueFormData)?.items || [];
+      const items = (value as KeyValueFormData)?.items || [];
       debouncedInvokerRef.current?.(items as KeyValueItem[]);
     });
 
     return () => subscription.unsubscribe();
   }, [form]);
 
-
   return (
     <div className={cn("w-full", className)}>
       <Form {...form}>
-        <div className="space-y-2">
+        <div className="space-y-4">
+          {/* Header */}
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium text-zinc-400">
-              Query parameters
+              Query Parameters
             </h3>
             <div className="flex items-center gap-2">
               <Button
@@ -163,6 +175,8 @@ const KeyValueFormEditor: React.FC<KeyValueFormEditorProps> = ({
               </Button>
             </div>
           </div>
+
+          {/* Form Fields */}
           <div className="space-y-2">
             {fields.map((field, index) => (
               <div
@@ -174,6 +188,7 @@ const KeyValueFormEditor: React.FC<KeyValueFormEditorProps> = ({
                     : "bg-zinc-800/50 border-zinc-800 opacity-60"
                 )}
               >
+                {/* Key Input */}
                 <div className="col-span-4">
                   <FormField
                     control={form.control}
@@ -194,7 +209,7 @@ const KeyValueFormEditor: React.FC<KeyValueFormEditorProps> = ({
                   />
                 </div>
 
-
+                {/* Value Input */}
                 <div className="col-span-4">
                   <FormField
                     control={form.control}
@@ -214,6 +229,7 @@ const KeyValueFormEditor: React.FC<KeyValueFormEditorProps> = ({
                     )}
                   />
                 </div>
+
                 <div className="col-span-1 flex items-center justify-center">
                   <FormField
                     control={form.control}
@@ -246,6 +262,7 @@ const KeyValueFormEditor: React.FC<KeyValueFormEditorProps> = ({
                     )}
                   />
                 </div>
+                {/* Remove Button */}
                 <div className="col-span-1 flex items-center justify-center">
                   <Button
                     type="button"
@@ -265,18 +282,18 @@ const KeyValueFormEditor: React.FC<KeyValueFormEditorProps> = ({
                 </div>
               </div>
             ))}
-
-            <div className="flex justify-end pt-4">
-              <span className="text-xs text-zinc-500">
-                Changes saved automatically
-              </span>
-            </div>
           </div>
-        </div >
-      </Form >
 
-    </div >
-  )
-}
+          {/* Autosave enabled — changes are saved automatically */}
+          <div className="flex justify-end pt-4">
+            <span className="text-xs text-zinc-500">
+              Changes saved automatically
+            </span>
+          </div>
+        </div>
+      </Form>
+    </div>
+  );
+};
 
-export default KeyValueFormEditor
+export default KeyValueFormEditor;

@@ -3,6 +3,7 @@ import { Tabs } from "@radix-ui/react-tabs"
 import KeyValueFormEditor from "./KeyValueFormEditor"
 import { RequestTab } from "../store/useRequestStore"
 import { toast } from "sonner"
+import BodyEditor from "./BodyEditor"
 
 
 interface Props {
@@ -94,6 +95,10 @@ const RequestEditorArea = ({ tab, updateTab }: Props) => {
             </TabsContent>
             <TabsContent value="body" >
                 {/* <KeyValueFormEditor initialData={getBodyData()} onSubmit={() => { handleBodyChange }} /> */}
+                <BodyEditor
+                    initialData={getBodyData()}
+                    onSubmit={handleBodyChange}
+                />
 
             </TabsContent>
 
