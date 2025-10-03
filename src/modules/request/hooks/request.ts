@@ -26,14 +26,14 @@ export function useGetAllRequestFromCollection(collectionId: string) {
 
 
 export function useSaveRequest(id: string) {
+    const { updateTabFromSavedRequest, activeTabId } = useRequestPlaygroundStore()
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async (value: Request) => saveRequest(id, value),
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ["requests"] });
-            console.log('====================================');
-            console.log(data);
-            console.log('====================================');
+            updateTabFromSavedRequest(activeTabId!, data)
+
         }
     })
 }
