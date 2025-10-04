@@ -124,18 +124,30 @@ enum REST_METHOD {
 }
 
 model Request {
-  id         String      @id @default(uuid())
-  name       String
-  method     REST_METHOD @default(GET)
-  url        String
-  parameters Json?
-  headers    Json?
-
+  id           String       @id @default(uuid())
+  name         String
+  method       REST_METHOD  @default(GET)
+  url          String
+  parameters   Json?
+  headers      Json?
+  request      RequestRun[]
   body         Json?
   response     Json?
-  Collection   Collection? @relation(fields: [collectionId], references: [id],onDelete: Cascade)
+  Collection   Collection?  @relation(fields: [collectionId], references: [id], onDelete: Cascade)
   collectionId String?
 
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @default(now()) @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model RequestRun {
+  id         String   @id @default(uuid())
+  status     Int
+  statusText String?
+  headers    Json?
+  body       Json?
+  durationMs Int?
+  requestId  String?
+  Request    Request? @relation(fields: [requestId], references: [id])
+  createdAt  DateTime @default(now())
 }
