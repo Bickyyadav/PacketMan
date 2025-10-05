@@ -25,6 +25,32 @@ export type RequestTab = {
     workspaceId?: string;
 };
 
+type HeadersMap = Record<string, string>;
+
+interface RequestRun {
+    id: string;
+    requestId?: string;
+    status?: number;
+    statusText?: string;
+    headers?: HeadersMap;
+    body?: string | object | null;
+    durationMs?: number;
+    createdAt?: string;
+}
+
+interface Result {
+    status?: number;
+    statusText?: string;
+    duration?: number;
+    size?: number;
+}
+
+export interface ResponseData {
+    success: boolean;
+    requestRun: RequestRun;
+    result?: Result;
+}
+
 type PlaygroundState = {
     tabs: RequestTab[];
     activeTabId: string | null;
@@ -35,15 +61,32 @@ type PlaygroundState = {
     markUnsaved: (id: string, value: boolean) => void;
     openRequestTab: (req: any) => void;
     updateTabFromSavedRequest: (tabId: string, savedRequest: SavedRequest) => void;
-    // responseViewerData: ResponseData | null;
-    // setResponseViewerData: (data: ResponseData) => void
+    responseViewerData: ResponseData | null;
+    setResponseViewerData: (data: ResponseData) => void
 };
 
-export const useRequestPlaygroundStore = create<PlaygroundState>((set) => ({
+interface SetFunction<T> {
+    (fn: (state: T) => Partial<T> | T): void;
+    (partial: Partial<T>): void;
+}
+
+interface OpenRequestTabArg {
+    id: string;
+    name?: string;
+    method: string;
+    url: string;
+    body?: string;
+    headers?: string;
+    parameters?: string;
+    collectionId?: string;
+    workspaceId?: string;
+}
+
+export const useRequestPlaygroundStore = create<PlaygroundState>((set: SetFunction<PlaygroundState>) => ({
     responseViewerData: null,
-    // setResonseViewerData: (data) => set({ responseViewerData: data }),
+    setResponseViewerData: (data: ResponseData ) => set({ responseViewerData: data }),
     tabs: [
-        {
+        {   
             id: nanoid(),
             title: "Request",
             method: "GET",
@@ -53,8 +96,8 @@ export const useRequestPlaygroundStore = create<PlaygroundState>((set) => ({
     ],
     activeTabId: null,
 
-    addTab: () => {
-        set((state) => {
+    addTab: (): void => {
+        set((state: PlaygroundState) => {
             const newTab: RequestTab = {
                 id: nanoid(),
                 title: "Untitled",
@@ -72,8 +115,8 @@ export const useRequestPlaygroundStore = create<PlaygroundState>((set) => ({
         });
     },
 
-    closeTab: (id) =>
-        set((state) => {
+    closeTab: (id: string): void =>
+        set((state: PlaygroundState) => {
             const newTabs = state.tabs.filter((t) => t.id !== id);
             const newActive =
                 state.activeTabId === id && newTabs.length > 0
@@ -81,16 +124,16 @@ export const useRequestPlaygroundStore = create<PlaygroundState>((set) => ({
                     : state.activeTabId;
             return { tabs: newTabs, activeTabId: newActive };
         }),
-    setActiveTab: (id) => set({ activeTabId: id }),
-    updateTab: (id, data) =>
-        set((state) => ({
+    setActiveTab: (id: string): void => set({ activeTabId: id }),
+    updateTab: (id: string, data: Partial<RequestTab>): void =>
+        set((state: PlaygroundState) => ({
             tabs: state.tabs.map((t) =>
                 t.id === id ? { ...t, ...data, unsavedChanges: true } : t
             ),
         })),
 
-    openRequestTab: (req) =>
-        set((state) => {
+    openRequestTab: (req: OpenRequestTabArg): void =>
+        set((state: PlaygroundState) => {
             const existing = state.tabs.find((t) => t.requestId === req.id);
             if (existing) {
                 return { activeTabId: existing.id };
@@ -113,14 +156,14 @@ export const useRequestPlaygroundStore = create<PlaygroundState>((set) => ({
                 activeTabId: newTab.id,
             };
         }),
-    markUnsaved: (id, value) =>
-        set((state) => ({
+    markUnsaved: (id: string, value: boolean): void =>
+        set((state: PlaygroundState) => ({
             tabs: state.tabs.map((t) =>
-                t.id === id ? { ...t, unsavedchanges: value } : t)
+                t.id === id ? { ...t, unsavedChanges: value } : t)
         })),
 
-    updateTabFromSavedRequest: (tabId: string, savedRequest: SavedRequest) =>
-        set((state) => ({
+    updateTabFromSavedRequest: (tabId: string, savedRequest: SavedRequest): void =>
+        set((state: PlaygroundState) => ({
             tabs: state.tabs.map((t) =>
                 t.id === tabId ? {
                     ...t, id: savedRequest.id, //  Replace temporary id with saved one

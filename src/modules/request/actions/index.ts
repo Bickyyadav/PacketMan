@@ -102,6 +102,10 @@ export async function sendRequest(req: {
 
 
 
+
+
+
+
 export async function run(requestId: string) {
     try {
         const request = await db.request.findUnique({
@@ -175,4 +179,75 @@ export async function run(requestId: string) {
         }
     }
 
+
+
+
+}
+
+
+export async function runDirect(requestData: {
+    id: string;
+    method: string;
+    url: string;
+    headers?: Record<string, string>;
+    parameters?: Record<string, any>;
+    body?: any;
+}) {
+    try {
+        const requestConfig = {
+            method: requestData.method,
+            url: requestData.url,
+            headers: requestData.headers,
+            params: requestData.parameters,
+            body: requestData.body
+        };
+
+        const result = await sendRequest(requestConfig);
+
+        const requestRun = await db.requestRun.create({
+            data: {
+                requestId: requestData.id,
+                status: result.status || 0,
+                statusText: result.statusText || (result.error ? 'Error' : null),
+                headers: result.headers || "",
+                body: result.data ? (typeof result.data === 'string' ? result.data : JSON.stringify(result.data)) : null,
+                durationMs: result.duration || 0
+            }
+        });
+
+        // Update request with latest response if successful
+        if (result.data && !result.error) {
+            await db.request.update({
+                where: { id: requestData.id },
+                data: {
+                    response: result.data,
+                    updatedAt: new Date()
+                }
+            });
+        }
+
+        return {
+            success: true,
+            requestRun,
+            result
+        };
+
+    } catch (error: any) {
+        const failedRun = await db.requestRun.create({
+            data: {
+                requestId: requestData.id,
+                status: 0,
+                statusText: 'Failed',
+                headers: "",
+                body: error.message,
+                durationMs: 0
+            }
+        });
+
+        return {
+            success: false,
+            error: error.message,
+            requestRun: failedRun
+        };
+    }
 }

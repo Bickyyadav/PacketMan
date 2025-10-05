@@ -12,6 +12,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { useRunRequest } from '../hooks/request';
 
 
 
@@ -21,7 +22,7 @@ interface Props {
 }
 
 const RequestBar = ({ tab, updateTab }: Props) => {
-    // const { mutateAsync, isError, isPending } = useRunRequest(tab.requestId)
+    const { mutateAsync, isError, isPending } = useRunRequest(tab.requestId)
     const requestColorMap: Record<string, string> = {
         GET: "text-green-500",
         POST: "text-blue-500",
@@ -31,7 +32,7 @@ const RequestBar = ({ tab, updateTab }: Props) => {
 
     const onsendRequest = async () => {
         try {
-            // const res = await mutateAsync();
+            const res = await mutateAsync();
             toast.success("Request sent successfully!")
         } catch (error) {
             console.log("🚀 ~ onsendRequest ~ error:", error)
