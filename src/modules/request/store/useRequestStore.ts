@@ -6,9 +6,9 @@ interface SavedRequest {
     name: string;
     method: string;
     url: string;
-    body?: string;
-    headers?: string;
-    parameters?: string;
+    body?: any;
+    headers?: any;
+    parameters?: any;
 }
 
 export type RequestTab = {
@@ -29,13 +29,13 @@ type HeadersMap = Record<string, string>;
 
 interface RequestRun {
     id: string;
-    requestId?: string;
+    requestId?: string | null;
     status?: number;
-    statusText?: string;
-    headers?: HeadersMap;
-    body?: string | object | null;
-    durationMs?: number;
-    createdAt?: string;
+    statusText?: string | null;
+    headers?: any;
+    body?: any;
+    durationMs?: number | null;
+    createdAt?: string | Date;
 }
 
 interface Result {
@@ -47,8 +47,9 @@ interface Result {
 
 export interface ResponseData {
     success: boolean;
-    requestRun: RequestRun;
+    requestRun?: RequestRun;
     result?: Result;
+    error?: string;
 }
 
 type PlaygroundState = {
@@ -84,9 +85,9 @@ interface OpenRequestTabArg {
 
 export const useRequestPlaygroundStore = create<PlaygroundState>((set: SetFunction<PlaygroundState>) => ({
     responseViewerData: null,
-    setResponseViewerData: (data: ResponseData ) => set({ responseViewerData: data }),
+    setResponseViewerData: (data: ResponseData) => set({ responseViewerData: data }),
     tabs: [
-        {   
+        {
             id: nanoid(),
             title: "Request",
             method: "GET",
@@ -163,19 +164,28 @@ export const useRequestPlaygroundStore = create<PlaygroundState>((set: SetFuncti
         })),
 
     updateTabFromSavedRequest: (tabId: string, savedRequest: SavedRequest): void =>
-        set((state: PlaygroundState) => ({
-            tabs: state.tabs.map((t) =>
-                t.id === tabId ? {
-                    ...t, id: savedRequest.id, //  Replace temporary id with saved one
-                    title: savedRequest.name,
-                    method: savedRequest.method,
-                    body: savedRequest?.body,
-                    headers: savedRequest?.headers,
-                    parameters: savedRequest?.parameters,
-                    url: savedRequest.url,
-                    unsavedChanges: false,
-                } : t),
-            activeTabId: savedRequest.id, //  keep active in sync
-        })),
+        set((state: PlaygroundState) => {
+            const toString = (val: any) => {
+                if (val === null || val === undefined) return "";
+                if (typeof val === "string") return val;
+                return JSON.stringify(val);
+            };
+
+            return {
+                tabs: state.tabs.map((t) =>
+                    t.id === tabId ? {
+                        ...t,
+                        id: savedRequest.id, // Replace temporary id with saved one
+                        title: savedRequest.name,
+                        method: savedRequest.method,
+                        body: toString(savedRequest.body),
+                        headers: toString(savedRequest.headers),
+                        parameters: toString(savedRequest.parameters),
+                        url: savedRequest.url,
+                        unsavedChanges: false,
+                    } : t),
+                activeTabId: savedRequest.id, // keep active in sync
+            };
+        }),
 
 }));

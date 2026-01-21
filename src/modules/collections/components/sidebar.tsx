@@ -73,11 +73,11 @@ const TabbedSidebar = ({ currentWorkspace }: Props) => {
                </div>
 
             );
+         // if no tab is active then this will show
          default:
             return <div className='p-4 text-zinc-400'>Select a tab to view content</div>
       }
    }
-
 
    return (
       <div className='flex h-screen bg-zinc-900'>

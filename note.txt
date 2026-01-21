@@ -23,3 +23,9 @@ chapter:6
 2. add actions 
 3. add tanstack hook
 4. implement ui for the collections 
+
+chapter:7
+1. Add prisma schema for request 
+2. add server action for request 
+3. Add tanstack for request
+4. implement request adding modal

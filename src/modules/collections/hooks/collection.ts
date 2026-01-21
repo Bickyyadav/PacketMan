@@ -8,10 +8,8 @@ export function useCollections(workspaceId: string) {
     });
 }
 
-
 export function useCreateCollection(workspaceId: string) {
     const queryClient = useQueryClient();
-
     return useMutation({
         mutationFn: async (name: string) => createCollection(workspaceId, name),
         onSuccess: () => {
@@ -22,7 +20,6 @@ export function useCreateCollection(workspaceId: string) {
 
 export function useDeleteCollection(collectionId: string) {
     const queryClient = useQueryClient();
-
     return useMutation({
         mutationFn: async () => deleteCollections(collectionId),
         onSuccess: () => {
@@ -31,11 +28,8 @@ export function useDeleteCollection(collectionId: string) {
     })
 }
 
-
-
 export function useEditCollection(collectionId: string, name: string) {
     const queryClient = useQueryClient();
-
     return useMutation({
         mutationFn: async () => editCollection(collectionId, name),
         onSuccess: () => {

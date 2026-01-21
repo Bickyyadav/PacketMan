@@ -15,6 +15,7 @@ const CreateCollection = ({ workspaceId, isModalOpen, setIsModalOpen }: {
     const [name, setName] = useState("")
     const { mutateAsync, isPending } = useCreateCollection(workspaceId)
 
+
     const handleSubmit = async () => {
         if (!name.trim()) {
             return

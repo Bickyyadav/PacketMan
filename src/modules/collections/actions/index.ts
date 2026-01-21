@@ -3,7 +3,6 @@
 import db from "@/lib/db"
 
 export const createCollection = async (workspaceId: string, name: string) => {
-
     const collection = db.collection.create({
         data: {
             name,
@@ -16,7 +15,7 @@ export const createCollection = async (workspaceId: string, name: string) => {
     })
     return collection
 }
-
+ 
 export const getCollections = async (workspaceId: string) => {
     const collection = await db.collection.findMany({
         where: {

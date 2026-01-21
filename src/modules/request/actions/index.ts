@@ -69,7 +69,6 @@ export async function sendRequest(req: {
         data: req.body,
         validateStatus: () => true,
     }
-
     const start = performance.now();
     try {
         const res = await axios(config)
@@ -99,13 +98,6 @@ export async function sendRequest(req: {
     }
 }
 
-
-
-
-
-
-
-
 export async function run(requestId: string) {
     try {
         const request = await db.request.findUnique({
@@ -130,9 +122,9 @@ export async function run(requestId: string) {
             data: {
                 requestId: request.id,
                 status: result.status || 0,
-                statusText: result.statusText || (result.error ? 'Error' : null),
-                headers: result.headers || "",
-                body: result.data ? (typeof result.data === 'string' ? result.data : JSON.stringify(result.data)) : null,
+                statusText: result.statusText || (result.error ? 'Error' : undefined),
+                headers: result.headers || {},
+                body: result.data ? (typeof result.data === 'string' ? result.data : JSON.stringify(result.data)) : undefined,
                 durationMs: result.duration || 0
             }
         })
@@ -160,8 +152,8 @@ export async function run(requestId: string) {
                     requestId,
                     status: 0,
                     statusText: 'Failed',
-                    headers: "",
-                    body: error.message,
+                    headers: {},
+                    body: error.message || "Unknown error",
                     durationMs: 0
                 }
             });
@@ -178,10 +170,6 @@ export async function run(requestId: string) {
             };
         }
     }
-
-
-
-
 }
 
 
@@ -208,9 +196,9 @@ export async function runDirect(requestData: {
             data: {
                 requestId: requestData.id,
                 status: result.status || 0,
-                statusText: result.statusText || (result.error ? 'Error' : null),
-                headers: result.headers || "",
-                body: result.data ? (typeof result.data === 'string' ? result.data : JSON.stringify(result.data)) : null,
+                statusText: result.statusText || (result.error ? 'Error' : undefined),
+                headers: result.headers || {},
+                body: result.data ? (typeof result.data === 'string' ? result.data : JSON.stringify(result.data)) : undefined,
                 durationMs: result.duration || 0
             }
         });
@@ -238,8 +226,8 @@ export async function runDirect(requestData: {
                 requestId: requestData.id,
                 status: 0,
                 statusText: 'Failed',
-                headers: "",
-                body: error.message,
+                headers: {},
+                body: error.message || "Unknown error",
                 durationMs: 0
             }
         });

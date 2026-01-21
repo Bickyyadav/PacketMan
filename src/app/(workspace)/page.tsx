@@ -11,11 +11,10 @@ import RequestPlayground from "@/modules/request/components/RequestPlayground";
 import { useGetWorkspace } from "@/modules/workspace/hooks/workspace";
 import { Loader } from "lucide-react";
 
-
 const Page = () => {
   const { selectedWorkspace } = useWorkspaceStore();
-  const { data: currentWorkspace, isLoading } = useGetWorkspace(selectedWorkspace?.id ?? "")
-  if (isLoading) {
+  const { data: currentWorkspace, isPending } = useGetWorkspace(selectedWorkspace?.id ?? "")
+  if (isPending) {
     return (
       <div className="flex flex-col items-center justify-center h-full">
         <Loader className="animate-spin h-6 w-6 text-indigo-500" />
@@ -33,11 +32,10 @@ const Page = () => {
 
       <ResizablePanel defaultSize={35} maxSize={40} minSize={25} className="flex">
         <div className="flex-1">
-          <TabbedSidebar currentWorkspace={currentWorkspace} />
+          <TabbedSidebar currentWorkspace={currentWorkspace!} />
         </div>
       </ResizablePanel>
     </ResizablePanelGroup>
-
   )
 }
 
