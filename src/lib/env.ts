@@ -1,3 +1,4 @@
+// npm i @t3-oss/env-nextjs to protect from the environment variables
 import { createEnv } from "@t3-oss/env-nextjs"
 import z from "zod"
 

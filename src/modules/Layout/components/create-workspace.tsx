@@ -20,7 +20,6 @@ const Createworkspace = ({ isModalOpen, setIsModalOpen }: { isModalOpen: boolean
         } catch (error) {
             toast.error("Failed to create workspace");
             console.error("Failed to create workspace:", error);
-
         }
     }
 

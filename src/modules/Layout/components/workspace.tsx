@@ -21,8 +21,6 @@ const Workspace = () => {
     const { data: workspaces, isLoading, error } = useWorkspaces();
     const initializeWorkspaceMutation = useInitializeWorkspace();
 
-
-
     // adding data to store
     const { selectedWorkspace, setSelectedWorkspace } = useWorkspaceStore();
 

@@ -16,3 +16,4 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
     setSelectedWorkspace: (workspace) =>
         set(() => ({ selectedWorkspace: workspace })),
 }));
+
